@@ -92,10 +92,25 @@ if (process.env.STORAGE_TYPE === 'gcs') {
 // expect the log dir be relative to the projects root
 const logDir = config.logging.dir
 
-// Create the log directory if it doesn't exist
-if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir)
+// 再帰的にディレクトリ作成する関数
+function mkdirRecursive(dirPath: string) {
+    try {
+        // ディレクトリが存在する場合は何もしない
+        if (fs.existsSync(dirPath)) {
+            return
+        }
+
+        // 再帰的にディレクトリを作成
+        fs.mkdirSync(dirPath, { recursive: true })
+        console.log(`Created log directory: ${dirPath}`)
+    } catch (err) {
+        console.error(`Failed to create log directory ${dirPath}:`, err)
+        // エラーが発生しても処理を続行するため、例外を再スローしない
+    }
 }
+
+// ログディレクトリを再帰的に作成
+mkdirRecursive(logDir)
 
 const logger = createLogger({
     format: combine(
